@@ -74,6 +74,7 @@
         const _TK = ['ghp_gHq6cSk1k', 'Cl4Gt5bWpbeC', 'AOARF2hgw3HJvPf'];
         const GH_TOKEN = _TK.join('');
         const GH_API = 'https://api.github.com/repos/playok24/encuestas/contents/data.json';
+        let _lastSha = '';
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -99,9 +100,12 @@
                 return;
             }
             try {
-                const res = await fetch('/encuestas/data.json?t=' + Date.now());
+                const res = await fetch(GH_API, { headers: { 'Authorization': 'token ' + GH_TOKEN, 'Accept': 'application/vnd.github.v3+json' } });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
-                const data = await res.json();
+                const info = await res.json();
+                _lastSha = info.sha;
+                const jsonStr = decodeURIComponent(escape(atob(info.content)));
+                const data = JSON.parse(jsonStr);
                 const surveys = data.surveys || [];
                 const survey = surveys.find(s => s.id === id);
                 if (!survey) {
@@ -159,11 +163,12 @@
             survey.options[window._selectedOption].votes++;
             survey.voters.push(fp);
             try {
-                const getRes = await fetch(GH_API, { headers: { 'Authorization': 'token ' + GH_TOKEN, 'Accept': 'application/vnd.github.v3+json' } });
-                const fileInfo = await getRes.json();
-                const sha = fileInfo.sha;
+                if (!_lastSha) { const r = await fetch(GH_API, { headers: { 'Authorization': 'token ' + GH_TOKEN, 'Accept': 'application/vnd.github.v3+json' } }); const i = await r.json(); _lastSha = i.sha; }
                 const content = btoa(unescape(encodeURIComponent(JSON.stringify({ surveys: allSurveys }))));
-                await fetch(GH_API, { method: 'PUT', headers: { 'Authorization': 'token ' + GH_TOKEN, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Voto registrado', content: content, sha: sha }) });
+                const r2 = await fetch(GH_API, { method: 'PUT', headers: { 'Authorization': 'token ' + GH_TOKEN, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Voto registrado', content: content, sha: _lastSha }) });
+                if (!r2.ok) throw new Error('HTTP ' + r2.status);
+                const result = await r2.json();
+                _lastSha = result.content.sha;
                 showToast('Voto registrado');
                 renderSurvey(survey, allSurveys);
             } catch (e) { showToast('Error al guardar voto'); }
