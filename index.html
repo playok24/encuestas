@@ -252,7 +252,7 @@
                 if (name) options.push({ id: generateId(), name, img, trailer, votes: 0 });
             });
             if (options.length < 2) { showToast('Minimo 2 opciones'); return; }
-            surveys.push({ id: generateId(), title, desc, cover, expiry, options, createdAt: new Date().toISOString(), voters: [] });
+            surveys.push({ id: generateId(), title, desc, cover, expiry, options, palomitas: { dulces: 0, saladas: 0 }, createdAt: new Date().toISOString(), voters: [] });
             await saveData();
             document.getElementById('f-title').value = '';
             document.getElementById('f-desc').value = '';

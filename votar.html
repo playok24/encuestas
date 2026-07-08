@@ -37,6 +37,12 @@
         .vote-option .opt-text h4 { font-size: 1.1rem; }
         .vote-option .check { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; font-size: 0.9rem; }
         .vote-option.selected .check { background: #667eea; border-color: #667eea; }
+        .palomitas-col { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0 14px; border-left: 1px solid rgba(255,255,255,0.12); border-right: 1px solid rgba(255,255,255,0.12); flex-shrink: 0; }
+        .palomitas-col .pal-label { font-size: 0.65rem; color: #aaa; letter-spacing: 1px; text-transform: uppercase; }
+        .pal-btn { border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); color: #fff; border-radius: 8px; padding: 5px 10px; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .pal-btn:hover { border-color: rgba(255,200,0,0.5); }
+        .pal-btn.active { background: linear-gradient(135deg, #f7971e, #ffd200); color: #2a1a00; border-color: #ffd200; font-weight: 700; }
+        .vote-option { cursor: pointer; }
         .result-bar { margin-bottom: 18px; }
         .result-bar .bar-header { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
         .result-bar .bar-info { display: flex; align-items: center; gap: 12px; }
@@ -117,6 +123,7 @@
         }
 
         function renderSurvey(survey, allSurveys) {
+            window._palomita = null;
             const fp = getFingerprint();
             const hasVoted = survey.voters.includes(fp);
             const isExpired = survey.expiry && new Date(survey.expiry) < new Date();
@@ -132,7 +139,7 @@
             } else {
                 content += '<p style="color:#aaa;margin-bottom:16px;">Elegi una opcion y vota</p>';
                 survey.options.forEach((o, i) => {
-                    content += '<div class="vote-option" onclick="selectOption(' + i + ')" id="opt-' + i + '">' + (o.img ? '<img src="' + o.img + '" onerror="this.style.display=\'none\'">' : '') + '<div class="opt-text"><h4>' + o.name + '</h4></div>' + (o.trailer ? '<a class="btn btn-trailer" href="' + o.trailer + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ VER TRAILER</a>' : '') + '<div class="check" id="check-' + i + '">✓</div></div>';
+                    content += '<div class="vote-option" onclick="selectOption(' + i + ')" id="opt-' + i + '">' + (o.img ? '<img src="' + o.img + '" onerror="this.style.display=\'none\'">' : '') + '<div class="opt-text"><h4>' + o.name + '</h4></div>' + (o.trailer ? '<a class="btn btn-trailer" href="' + o.trailer + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ VER TRAILER</a>' : '') + '<div class="palomitas-col"><span class="pal-label">Palomitas</span><button type="button" class="pal-btn" onclick="event.stopPropagation(); selectPalomita(\'dulces\', this)">🍿 Dulces</button><button type="button" class="pal-btn" onclick="event.stopPropagation(); selectPalomita(\'saladas\', this)">🍿 Saladas</button></div>' + '<div class="check" id="check-' + i + '">✓</div></div>';
                 });
                 content += '<button class="btn btn-primary" onclick="castVote()" id="vote-btn" style="margin-top:16px;" disabled>Votar</button>';
             }
@@ -149,13 +156,22 @@
             window._selectedOption = idx;
         }
 
+        function selectPalomita(tipo, btn) {
+            window._palomita = tipo;
+            document.querySelectorAll('.pal-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
         async function castVote() {
             if (window._selectedOption === undefined) return;
             const survey = window._currentSurvey;
             const allSurveys = window._allSurveys;
             const fp = getFingerprint();
             if (survey.voters.includes(fp)) { showToast('Ya votaste'); return; }
+            if (!survey.palomitas) survey.palomitas = { dulces: 0, saladas: 0 };
             survey.options[window._selectedOption].votes++;
+            if (window._palomita === 'dulces') survey.palomitas.dulces++;
+            else if (window._palomita === 'saladas') survey.palomitas.saladas++;
             survey.voters.push(fp);
             try {
                 if (!_lastSha) { const r = await fetch(GH_API, { headers: { 'Authorization': 'token ' + GH_TOKEN, 'Accept': 'application/vnd.github.v3+json' } }); const i = await r.json(); _lastSha = i.sha; }
