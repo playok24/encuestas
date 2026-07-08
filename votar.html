@@ -20,10 +20,7 @@
         .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; width: 100%; justify-content: center; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-        .btn-whatsapp { background: #25D366; color: #fff; width: 100%; justify-content: center; }
-        .btn-whatsapp:hover { background: #1da851; }
-        .btn-copy { background: rgba(255,255,255,0.08); color: #ccc; border: 1px solid rgba(255,255,255,0.15); width: 100%; justify-content: center; }
-        .btn-copy:hover { background: rgba(255,255,255,0.15); }
+
         .survey-cover { width: 100%; max-height: 280px; object-fit: cover; border-radius: 16px; margin-bottom: 24px; }
         .survey-title { font-size: 1.8rem; margin-bottom: 8px; }
         .survey-desc { color: #aaa; margin-bottom: 8px; line-height: 1.5; }
@@ -46,9 +43,7 @@
         .result-bar .percentage { font-weight: 700; color: #667eea; font-size: 1.05rem; }
         .result-bar .bar-track { height: 14px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
         .result-bar .bar-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 10px; transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); min-width: 2px; }
-        .share-section { margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); }
-        .share-section h4 { color: #aaa; margin-bottom: 12px; font-size: 0.9rem; }
-        .share-section .btn { margin-bottom: 8px; }
+
         .empty-state { text-align: center; padding: 60px 20px; color: #666; }
         .empty-state .icon { font-size: 4rem; margin-bottom: 12px; }
         .empty-state h3 { color: #aaa; }
@@ -140,8 +135,6 @@
                 content += '<button class="btn btn-primary" onclick="castVote()" id="vote-btn" style="margin-top:16px;" disabled>Votar</button>';
             }
 
-            content += '<div class="share-section"><h4>Compartir esta encuesta</h4><button class="btn btn-whatsapp" onclick="shareWhatsApp()">📱 WhatsApp</button><button class="btn btn-copy" onclick="copyLink()">📋 Copiar link</button></div></div>';
-
             document.getElementById('survey-view').innerHTML = content;
             document.getElementById('survey-view').style.display = 'block';
             window._currentSurvey = survey;
@@ -173,10 +166,6 @@
                 renderSurvey(survey, allSurveys);
             } catch (e) { showToast('Error al guardar voto'); }
         }
-
-        function shareWhatsApp() { window.open('https://wa.me/?text=' + encodeURIComponent('Vota en esta encuesta: ' + window.location.href), '_blank'); }
-
-        function copyLink() { navigator.clipboard.writeText(window.location.href).then(() => showToast('Link copiado')); }
 
         loadSurvey();
     </script>
