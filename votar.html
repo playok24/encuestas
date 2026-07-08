@@ -71,17 +71,7 @@
     </div>
     <div class="toast" id="toast"></div>
     <script>
-        const DATA_URL = 'https://raw.githubusercontent.com/playok24/encuestas/main/data.json';
-        const API_URL = 'https://api.github.com/repos/playok24/encuestas/contents/data.json';
-
-        function getToken() {
-            let t = localStorage.getItem('gh_token');
-            if (!t) {
-                t = prompt('Ingresa tu GitHub Personal Access Token:');
-                if (t) localStorage.setItem('gh_token', t);
-            }
-            return t;
-        }
+        const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019f3f25-8bd0-7043-abbf-af9fd9756649';
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -107,7 +97,7 @@
                 return;
             }
             try {
-                const res = await fetch(DATA_URL + '?t=' + Date.now());
+                const res = await fetch(BLOB_URL + '?t=' + Date.now());
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
                 const surveys = data.surveys || [];
@@ -166,14 +156,12 @@
             if (survey.voters.includes(fp)) { showToast('Ya votaste'); return; }
             survey.options[window._selectedOption].votes++;
             survey.voters.push(fp);
-            const token = getToken();
-            if (!token) return;
             try {
-                const getRes = await fetch(API_URL, { headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' } });
-                const fileInfo = await getRes.json();
-                const sha = fileInfo.sha;
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify({ surveys: allSurveys }))));
-                await fetch(API_URL, { method: 'PUT', headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Voto registrado', content: content, sha: sha }) });
+                await fetch(BLOB_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ surveys: allSurveys })
+                });
                 showToast('Voto registrado');
                 renderSurvey(survey, allSurveys);
             } catch (e) { showToast('Error al guardar voto'); }
