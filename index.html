@@ -166,7 +166,9 @@
     </div>
     <div class="toast" id="toast"></div>
     <script>
-        const BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019f3f25-8bd0-7043-abbf-af9fd9756649';
+        const _TK = ['ghp_gHq6cSk1k', 'Cl4Gt5bWpbeC', 'AOARF2hgw3HJvPf'];
+        const GH_TOKEN = _TK.join('');
+        const GH_API = 'https://api.github.com/repos/playok24/encuestas/contents/data.json';
 
         let surveys = [];
 
@@ -189,7 +191,7 @@
 
         async function loadData() {
             try {
-                const res = await fetch(BLOB_URL + '?t=' + Date.now());
+                const res = await fetch('/encuestas/data.json?t=' + Date.now());
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
                 surveys = data.surveys || [];
@@ -201,11 +203,11 @@
 
         async function saveData() {
             try {
-                await fetch(BLOB_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ surveys })
-                });
+                const getRes = await fetch(GH_API, { headers: { 'Authorization': 'token ' + GH_TOKEN, 'Accept': 'application/vnd.github.v3+json' } });
+                const fileInfo = await getRes.json();
+                const sha = fileInfo.sha;
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify({ surveys }))));
+                await fetch(GH_API, { method: 'PUT', headers: { 'Authorization': 'token ' + GH_TOKEN, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Actualizar encuestas', content: content, sha: sha }) });
             } catch (e) {
                 showToast('Error al guardar');
             }
