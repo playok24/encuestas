@@ -70,6 +70,7 @@
         }
         .option-item input[type="text"] { flex: 2; }
         .option-item input[type="url"] { flex: 3; }
+        .option-item input.opt-trailer { flex: 3; }
         .option-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; background: rgba(255,255,255,0.1); }
         .option-item .remove-btn { background: #ff4757; border: none; color: #fff; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; }
         .survey-item {
@@ -228,7 +229,7 @@
             const idx = list.children.length + 1;
             const div = document.createElement('div');
             div.className = 'option-item';
-            div.innerHTML = '<input type="text" placeholder="Opción ' + idx + '" class="opt-name"><input type="url" placeholder="URL imagen (opcional)" class="opt-img"><img src="" class="opt-preview" style="display:none;" onerror="this.style.display=\'none\'"><button class="remove-btn" onclick="this.parentElement.remove()">×</button>';
+            div.innerHTML = '<input type="text" placeholder="Opción ' + idx + '" class="opt-name"><input type="url" placeholder="URL imagen (opcional)" class="opt-img"><input type="url" placeholder="URL trailer YouTube (opcional)" class="opt-trailer"><img src="" class="opt-preview" style="display:none;" onerror="this.style.display=\'none\'"><button class="remove-btn" onclick="this.parentElement.remove()">×</button>';
             div.querySelector('.opt-img').addEventListener('input', function() {
                 const preview = div.querySelector('.opt-preview');
                 if (this.value) { preview.src = this.value; preview.style.display = 'block'; }
@@ -247,7 +248,8 @@
             document.querySelectorAll('.option-item').forEach(item => {
                 const name = item.querySelector('.opt-name').value.trim();
                 const img = item.querySelector('.opt-img').value.trim();
-                if (name) options.push({ id: generateId(), name, img, votes: 0 });
+                const trailer = item.querySelector('.opt-trailer').value.trim();
+                if (name) options.push({ id: generateId(), name, img, trailer, votes: 0 });
             });
             if (options.length < 2) { showToast('Minimo 2 opciones'); return; }
             surveys.push({ id: generateId(), title, desc, cover, expiry, options, createdAt: new Date().toISOString(), voters: [] });

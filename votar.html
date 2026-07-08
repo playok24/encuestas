@@ -20,6 +20,8 @@
         .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; width: 100%; justify-content: center; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-trailer { background: linear-gradient(135deg, #11998e, #38ef7d); color: #04250f; font-weight: 700; padding: 10px 18px; font-size: 0.85rem; margin-left: auto; white-space: nowrap; }
+        .btn-trailer:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(56,239,125,0.4); }
 
         .survey-cover { width: 100%; max-height: 280px; object-fit: cover; border-radius: 16px; margin-bottom: 24px; }
         .survey-title { font-size: 1.8rem; margin-bottom: 8px; }
@@ -130,7 +132,7 @@
             } else {
                 content += '<p style="color:#aaa;margin-bottom:16px;">Elegi una opcion y vota</p>';
                 survey.options.forEach((o, i) => {
-                    content += '<div class="vote-option" onclick="selectOption(' + i + ')" id="opt-' + i + '">' + (o.img ? '<img src="' + o.img + '" onerror="this.style.display=\'none\'">' : '') + '<div class="opt-text"><h4>' + o.name + '</h4></div><div class="check" id="check-' + i + '">✓</div></div>';
+                    content += '<div class="vote-option" onclick="selectOption(' + i + ')" id="opt-' + i + '">' + (o.img ? '<img src="' + o.img + '" onerror="this.style.display=\'none\'">' : '') + '<div class="opt-text"><h4>' + o.name + '</h4></div>' + (o.trailer ? '<a class="btn btn-trailer" href="' + o.trailer + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ VER TRAILER</a>' : '') + '<div class="check" id="check-' + i + '">✓</div></div>';
                 });
                 content += '<button class="btn btn-primary" onclick="castVote()" id="vote-btn" style="margin-top:16px;" disabled>Votar</button>';
             }
