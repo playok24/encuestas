@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votar - Encuesta</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 30px 0 20px; }
+        header h1 { font-size: 1.8rem; background: linear-gradient(90deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card { background: rgba(255,255,255,0.06); border-radius: 20px; padding: 30px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.08); }
+        .btn { padding: 14px 28px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; width: 100%; justify-content: center; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-whatsapp { background: #25D366; color: #fff; width: 100%; justify-content: center; }
+        .btn-whatsapp:hover { background: #1da851; }
+        .btn-copy { background: rgba(255,255,255,0.08); color: #ccc; border: 1px solid rgba(255,255,255,0.15); width: 100%; justify-content: center; }
+        .btn-copy:hover { background: rgba(255,255,255,0.15); }
+        .survey-cover { width: 100%; max-height: 280px; object-fit: cover; border-radius: 16px; margin-bottom: 24px; }
+        .survey-title { font-size: 1.8rem; margin-bottom: 8px; }
+        .survey-desc { color: #aaa; margin-bottom: 8px; line-height: 1.5; }
+        .survey-expiry { color: #667eea; font-size: 0.85rem; margin-bottom: 20px; }
+        .total-votes { text-align: center; font-size: 0.9rem; color: #aaa; margin-bottom: 20px; }
+        .total-votes strong { color: #667eea; font-size: 1.3rem; }
+        .vote-option { display: flex; align-items: center; gap: 16px; padding: 16px; background: rgba(255,255,255,0.04); border-radius: 14px; margin-bottom: 12px; border: 2px solid transparent; cursor: pointer; transition: all 0.3s; }
+        .vote-option:hover { border-color: rgba(102,126,234,0.4); background: rgba(255,255,255,0.07); }
+        .vote-option.selected { border-color: #667eea; background: rgba(102,126,234,0.12); }
+        .vote-option img { width: 70px; height: 70px; object-fit: cover; border-radius: 12px; flex-shrink: 0; }
+        .vote-option .opt-text { flex: 1; }
+        .vote-option .opt-text h4 { font-size: 1.1rem; }
+        .vote-option .check { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; font-size: 0.9rem; }
+        .vote-option.selected .check { background: #667eea; border-color: #667eea; }
+        .result-bar { margin-bottom: 18px; }
+        .result-bar .bar-header { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
+        .result-bar .bar-info { display: flex; align-items: center; gap: 12px; }
+        .result-bar .bar-info img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
+        .result-bar .bar-info span { font-weight: 500; }
+        .result-bar .percentage { font-weight: 700; color: #667eea; font-size: 1.05rem; }
+        .result-bar .bar-track { height: 14px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
+        .result-bar .bar-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 10px; transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); min-width: 2px; }
+        .share-section { margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); }
+        .share-section h4 { color: #aaa; margin-bottom: 12px; font-size: 0.9rem; }
+        .share-section .btn { margin-bottom: 8px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #666; }
+        .empty-state .icon { font-size: 4rem; margin-bottom: 12px; }
+        .empty-state h3 { color: #aaa; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #38ef7d; color: #000; padding: 12px 24px; border-radius: 10px; font-weight: 600; z-index: 999; transition: transform 0.4s; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .voted-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(56,239,125,0.15); color: #38ef7d; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-bottom: 20px; }
+        .loading { text-align: center; padding: 60px 20px; color: #888; }
+        .loading .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 600px) { .card { padding: 20px; } .survey-title { font-size: 1.4rem; } .vote-option { flex-wrap: wrap; } .vote-option img { width: 60px; height: 60px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header><h1>Encuesta</h1></header>
+        <div id="app">
+            <div id="loading" class="loading"><div class="spinner"></div><p>Cargando encuesta...</p></div>
+            <div id="survey-view" style="display:none;"></div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        const DATA_URL = 'https://raw.githubusercontent.com/playok24/encuestas/main/data.json';
+        const API_URL = 'https://api.github.com/repos/playok24/encuestas/contents/data.json';
+
+        function getToken() {
+            let t = localStorage.getItem('gh_token');
+            if (!t) {
+                t = prompt('Ingresa tu GitHub Personal Access Token:');
+                if (t) localStorage.setItem('gh_token', t);
+            }
+            return t;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        function getFingerprint() {
+            let fp = localStorage.getItem('voter_fp');
+            if (!fp) {
+                fp = Math.random().toString(36).substr(2, 12);
+                localStorage.setItem('voter_fp', fp);
+            }
+            return fp;
+        }
+
+        async function loadSurvey() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (!id) {
+                document.getElementById('loading').innerHTML = '<div class="empty-state"><div class="icon">❌</div><h3>Encuesta no encontrada</h3><p>No se especifico una encuesta valida</p></div>';
+                return;
+            }
+            try {
+                const res = await fetch(DATA_URL + '?t=' + Date.now());
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                const surveys = data.surveys || [];
+                const survey = surveys.find(s => s.id === id);
+                if (!survey) {
+                    document.getElementById('loading').innerHTML = '<div class="empty-state"><div class="icon">❌</div><h3>Encuesta no encontrada</h3><p>Puede que haya sido eliminada</p></div>';
+                    return;
+                }
+                document.getElementById('loading').style.display = 'none';
+                renderSurvey(survey, surveys);
+            } catch (e) {
+                document.getElementById('loading').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><h3>Error de conexion</h3><p>No se pudo cargar la encuesta</p></div>';
+            }
+        }
+
+        function renderSurvey(survey, allSurveys) {
+            const fp = getFingerprint();
+            const hasVoted = survey.voters.includes(fp);
+            const isExpired = survey.expiry && new Date(survey.expiry) < new Date();
+            const total = survey.options.reduce((a, o) => a + o.votes, 0);
+            let content = '<div class="card">' + (survey.cover ? '<img class="survey-cover" src="' + survey.cover + '" onerror="this.style.display=\'none\'">' : '') + '<h1 class="survey-title">' + survey.title + '</h1>' + (survey.desc ? '<p class="survey-desc">' + survey.desc + '</p>' : '') + (survey.expiry ? '<p class="survey-expiry">Cierra: ' + new Date(survey.expiry).toLocaleString('es-AR') + '</p>' : '');
+
+            if (hasVoted || isExpired) {
+                content += '<div class="voted-badge">✅ ' + (hasVoted ? 'Ya votaste' : 'Encuesta cerrada') + '</div><div class="total-votes"><strong>' + total + '</strong> voto' + (total !== 1 ? 's' : '') + '</div>';
+                survey.options.slice().sort((a, b) => b.votes - a.votes).forEach(o => {
+                    const pct = total > 0 ? ((o.votes / total) * 100).toFixed(1) : 0;
+                    content += '<div class="result-bar"><div class="bar-header"><div class="bar-info">' + (o.img ? '<img src="' + o.img + '" onerror="this.style.display=\'none\'">' : '') + '<span>' + o.name + '</span></div><span class="percentage">' + pct + '%</span></div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div></div>';
+                });
+            } else {
+                content += '<p style="color:#aaa;margin-bottom:16px;">Elegi una opcion y vota</p>';
+                survey.options.forEach((o, i) => {
+                    content += '<div class="vote-option" onclick="selectOption(' + i + ')" id="opt-' + i + '">' + (o.img ? '<img src="' + o.img + '" onerror="this.style.display=\'none\'">' : '') + '<div class="opt-text"><h4>' + o.name + '</h4></div><div class="check" id="check-' + i + '">✓</div></div>';
+                });
+                content += '<button class="btn btn-primary" onclick="castVote()" id="vote-btn" style="margin-top:16px;" disabled>Votar</button>';
+            }
+
+            content += '<div class="share-section"><h4>Compartir esta encuesta</h4><button class="btn btn-whatsapp" onclick="shareWhatsApp()">📱 WhatsApp</button><button class="btn btn-copy" onclick="copyLink()">📋 Copiar link</button></div></div>';
+
+            document.getElementById('survey-view').innerHTML = content;
+            document.getElementById('survey-view').style.display = 'block';
+            window._currentSurvey = survey;
+            window._allSurveys = allSurveys;
+        }
+
+        function selectOption(idx) {
+            document.querySelectorAll('.vote-option').forEach((el, i) => el.classList.toggle('selected', i === idx));
+            document.getElementById('vote-btn').disabled = false;
+            window._selectedOption = idx;
+        }
+
+        async function castVote() {
+            if (window._selectedOption === undefined) return;
+            const survey = window._currentSurvey;
+            const allSurveys = window._allSurveys;
+            const fp = getFingerprint();
+            if (survey.voters.includes(fp)) { showToast('Ya votaste'); return; }
+            survey.options[window._selectedOption].votes++;
+            survey.voters.push(fp);
+            const token = getToken();
+            if (!token) return;
+            try {
+                const getRes = await fetch(API_URL, { headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' } });
+                const fileInfo = await getRes.json();
+                const sha = fileInfo.sha;
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify({ surveys: allSurveys }))));
+                await fetch(API_URL, { method: 'PUT', headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Voto registrado', content: content, sha: sha }) });
+                showToast('Voto registrado');
+                renderSurvey(survey, allSurveys);
+            } catch (e) { showToast('Error al guardar voto'); }
+        }
+
+        function shareWhatsApp() { window.open('https://wa.me/?text=' + encodeURIComponent('Vota en esta encuesta: ' + window.location.href), '_blank'); }
+
+        function copyLink() { navigator.clipboard.writeText(window.location.href).then(() => showToast('Link copiado')); }
+
+        loadSurvey();
+    </script>
+</body>
+</html>
